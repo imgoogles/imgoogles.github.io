@@ -6,89 +6,94 @@
 <style>
     body {
         font-family: Arial;
-        padding: 20px;
+        padding: 0;
         background-color: black;
         color: white;
+        min-height: 100vh;
+        margin: 0;
         display: flex;
         flex-direction: column;
         align-items: center;
-        text-align: center;
     }
+
+    .container {
+        width: 100%;
+        max-width: 500px;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    h2 {
+        text-align: center;
+        font-size: 28px;
+        margin-bottom: 20px;
+    }
+
     textarea, input {
-        width: 320px;
+        width: 100%;
         background-color: black;
         border: 1px solid white;
         color: white;
-        display: block;
-        margin: 2px auto;
-        padding: 8px;
-        font-size: 16px;
+        margin: 8px 0;
+        padding: 10px;
+        font-size: 18px;
+        border-radius: 4px;
+        box-sizing: border-box;
     }
+
     button {
-        padding: 10px 20px;
-        margin-top: 8px;
+        width: 100%;
+        padding: 14px;
+        margin-top: 14px;
         border: 1px solid white;
         background: transparent;
         color: white;
-        font-size: small;
+        font-size: 18px;
         cursor: pointer;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
+        border-radius: 4px;
     }
+
+    button:active {
+        opacity: 0.6;
+    }
+
     #log {
         white-space: pre-line;
         margin-top: 20px;
-        max-width: 800px;
-        width: 90%;
-        text-align: left;
+        width: 100%;
+        background: rgba(255,255,255,0.05);
+        padding: 12px;
+        border-radius: 6px;
+        font-size: 16px;
+        box-sizing: border-box;
     }
-    @media (max-width: 600px) {
-        body {
-            padding: 10px;
-        }
-        h2 {
-            font-size: 24px;
-            margin: 10px 0;
-        }
-        label {
-            font-size: 16px;
-        }
-        textarea, input {
-            width: 90vw;
-            max-width: 100%;
-            font-size: 18px;
-            padding: 12px;
-        }
-        button {
-            padding: 14px 28px;
-            font-size: 16px;
-            margin-top: 12px;
-        }
-        #log {
-            width: 90vw;
-            max-width: 100%;
-            font-size: 14px;
-        }
+
+    @media (max-width: 420px) {
+        h2 { font-size: 22px; }
+        textarea, input, button { font-size: 16px; }
     }
 </style>
 </head>
 <body>
 
-<h2>Aircraft registrations to CSV</h2>
+<div class="container">
 
-<label>Date:</label><br>
-<input id="date_input" type="text" placeholder="e.g. 12.11.2025"><br><br>
+<h2>Aircraft Registrations → CSV</h2>
 
-<label>Airport:</label><br>
-<input id="airport_input" type="text" placeholder="e.g. PRG, OTP, CPH"><br><br>
+<label>Date:</label>
+<input id="date_input" type="text" placeholder="e.g. 12.11.2025">
 
-<label>Registrations (separated by space):</label><br>
-<textarea id="regs_input" rows="4" placeholder="OK-IOO YR-AME ..."></textarea><br>
+<label>Airport:</label>
+<input id="airport_input" type="text" placeholder="e.g. PRG, OTP, CPH">
+
+<label>Registrations (space separated):</label>
+<textarea id="regs_input" rows="4" placeholder="OK-IOO YR-AME ..."></textarea>
 
 <button onclick="startProcess()">Generate CSV</button>
 
 <div id="log"></div>
+
+</div>
 
 <script>
 async function fetchAircraftInfo(registration) {
@@ -125,15 +130,12 @@ async function fetchAircraftInfo(registration) {
             (photo && photo.Airline) ||
             "N/A";
 
-        const thumbnail = photo ? photo.Thumbnail : "N/A";
-        const fullImage = photo ? photo.Image : "N/A";
-
         return {
             Registration: registration,
             Type: type,
             Airline: airline,
-            Thumbnail: thumbnail,
-            FullImage: fullImage
+            Thumbnail: photo ? photo.Thumbnail : "N/A",
+            FullImage: photo ? photo.Image : "N/A"
         };
 
     } catch (e) {
@@ -160,7 +162,7 @@ async function startProcess() {
     let counter = 0;
 
     for (let reg of regs) {
-        log.innerText += `Searching ${reg} …\n`;
+        log.innerText += `Searching ${reg}…\n`;
 
         const info = await fetchAircraftInfo(reg);
 
@@ -205,4 +207,3 @@ function createCSV(data) {
 
 </body>
 </html>
-
