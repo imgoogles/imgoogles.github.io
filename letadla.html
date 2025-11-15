@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<title>Letadla – JetAPI</title>
+<style>
+    body { font-family: Arial; padding: 20px; }
+    textarea, input { width: 300px; }
+    button { padding: 10px 20px; margin-top: 10px; }
+    #log { white-space: pre-line; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<h2>Letadla – generátor CSV (přepis Python kódu)</h2>
+
+<label>Datum:</label><br>
+<input id="datum" type="text"><br><br>
+
+<label>Letiště:</label><br>
+<input id="letiste" type="text"><br><br>
+
+<label>Registrace (oddělené mezerou):</label><br>
+<textarea id="registrace" rows="4"></textarea><br>
+
+<button onclick="run()">Spustit</button>
+
+<div id="log"></div>
+
+<script>
+async function getAircraftInfo(registration) {
+    const url = `https://corsproxy.io/?https://www.jetapi.dev/api?reg=${registration}&photos=1&flights=0`;
+
+
+    try {
+        const resp = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" }});
+        if (!resp.ok) {
+            document.getElementById("log").innerText += `❌ ${registration}: HTTP ${resp.status}\n`;
+            return {
+                Registrace: registration,
+                Typ: "N/A",
+                Aerolinka: "N/A",
+                Thumbnail: "N/A",
+                FullImage: "N/A"
+            };
+        }
+
+        const data = await resp.json();
+
+        const fr = data.FlightRadar || {};
+        const jp = data.JetPhotos || {};
+        const images = jp.Images || [];
+        const photo = images[0]; // může být undefined, stejně jako v Pythonu
+
+        const typ =
+            (fr.Aircraft) ||
+            (photo && photo.Aircraft) ||
+            "N/A";
+
+        const aerolinka =
+            (fr.Airline) ||
+            (photo && photo.Airline) ||
+            "N/A";
+
+        const thumbnail = photo ? photo.Thumbnail : "N/A";
+        const full_image = photo ? photo.Image : "N/A";
+
+        return {
+            Registrace: registration,
+            Typ: typ,
+            Aerolinka: aerolinka,
+            Thumbnail: thumbnail,
+            FullImage: full_image
+        };
+
+    } catch (e) {
+        document.getElementById("log").innerText += `⚠️ Chyba při dotazu na ${registration}: ${e}\n`;
+        return {
+            Registrace: registration,
+            Typ: "N/A",
+            Aerolinka: "N/A",
+            Thumbnail: "N/A",
+            FullImage: "N/A"
+        };
+    }
+}
+
+async function run() {
+    const log = document.getElementById("log");
+    log.innerText = "";
+
+    const datum = document.getElementById("datum").value.trim();
+    const letiste = document.getElementById("letiste").value.trim().toUpperCase();
+    const registrace = document.getElementById("registrace").value.toUpperCase().split(/\s+/);
+
+    const vysledky = [];
+    let counter = 0;
+
+    for (let reg of registrace) {
+        log.innerText += `Hledám ${reg} …\n`;
+
+        const info = await getAircraftInfo(reg);
+
+        log.innerText += `➡️  ${info.Typ} – ${info.Aerolinka}\n`;
+
+        info.Datum = datum;
+        info.Letiště = letiste;
+        vysledky.push(info);
+
+        await new Promise(r => setTimeout(r, 500));  // stejně jako Python
+
+        counter++;
+        if (counter === 12) {
+            log.innerText += `\n⏳ Limit dosažen – čekám 75 sekund...\n\n`;
+            await new Promise(r => setTimeout(r, 75000));
+            counter = 0;
+        }
+    }
+
+    generateCSV(vysledky);
+}
+
+function generateCSV(data) {
+    const header = ["Datum", "Letiště", "Registrace", "Typ", "Aerolinka", "Thumbnail", "FullImage"];
+    let csv = header.join(",") + "\n";
+
+    data.forEach(row => {
+        csv += header.map(h => row[h]).join(",") + "\n";
+    });
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "letadla.csv";
+    a.click();
+
+    URL.revokeObjectURL(url);
+}
+</script>
+
+</body>
+</html>
