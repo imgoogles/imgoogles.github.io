@@ -4,10 +4,49 @@
 <meta charset="UTF-8">
 <title>Planespotting</title>
 <style>
-    body { font-family: Arial; padding: 20px; }
-    textarea, input { width: 300px; }
-    button { padding: 10px 20px; margin-top: 10px; }
-    #log { white-space: pre-line; margin-top: 20px; }
+    body {
+        font-family: Arial;
+        padding: 20px;
+        background-color: black;
+        color: white;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+    textarea, input {
+        width: 320px;
+        background-color: black;
+        border: 1px solid white;
+        color: white;
+        display: block;
+        margin: 6px auto;
+        padding: 6px;
+    }
+    button {
+        padding: 10px 20px;
+        margin-top: 10px;
+        border: 1px solid white;
+        background: transparent;
+        color: white;
+        font-size: small;
+        cursor: pointer;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    #log {
+        white-space: pre-line;
+        margin-top: 20px;
+        max-width: 800px;
+        width: 90%;
+        text-align: left;
+        background: rgba(255,255,255,0.03);
+        padding: 10px;
+        border-radius: 6px;
+    }
 </style>
 </head>
 <body>
