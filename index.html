@@ -15,13 +15,13 @@
 <h2>Aircraft registrations to CSV</h2>
 
 <label>Date:</label><br>
-<input id="datum" type="text"><br><br>
+<input id="date" type="text"><br><br>
 
 <label>Airport:</label><br>
-<input id="letiste" type="text"><br><br>
+<input id="airport" type="text"><br><br>
 
 <label>Registration (divided with space):</label><br>
-<textarea id="registrace" rows="4"></textarea><br>
+<textarea id="registration" rows="4"></textarea><br>
 
 <button onclick="run()">Start</button>
 
@@ -52,12 +52,12 @@ async function getAircraftInfo(registration) {
         const images = jp.Images || [];
         const photo = images[0]; // může být undefined, stejně jako v Pythonu
 
-        const typ =
+        const type =
             (fr.Aircraft) ||
             (photo && photo.Aircraft) ||
             "N/A";
 
-        const aerolinka =
+        const airline =
             (fr.Airline) ||
             (photo && photo.Airline) ||
             "N/A";
@@ -67,14 +67,14 @@ async function getAircraftInfo(registration) {
 
         return {
             Registration: registration,
-            Type: typ,
-            Airline: aerolinka,
+            Type: type,
+            Airline: airline,
             Thumbnail: thumbnail,
             FullImage: full_image
         };
 
     } catch (e) {
-        document.getElementById("log").innerText += `⚠️ Chyba při dotazu na ${registration}: ${e}\n`;
+        document.getElementById("log").innerText += `⚠️ Error with loading ${registration}: ${e}\n`;
         return {
             Registration: registration,
             Type: "N/A",
@@ -89,22 +89,22 @@ async function run() {
     const log = document.getElementById("log");
     log.innerText = "";
 
-    const datum = document.getElementById("datum").value.trim();
-    const letiste = document.getElementById("letiste").value.trim().toUpperCase();
-    const registrace = document.getElementById("registrace").value.toUpperCase().split(/\s+/);
+    const date = document.getElementById("datum").value.trim();
+    const airport = document.getElementById("letiste").value.trim().toUpperCase();
+    const registration = document.getElementById("registrace").value.toUpperCase().split(/\s+/);
 
     const vysledky = [];
     let counter = 0;
 
-    for (let reg of registrace) {
+    for (let reg of registration) {
         log.innerText += `Looking for ${reg} …\n`;
 
         const info = await getAircraftInfo(reg);
 
         log.innerText += `➡️  ${info.Typ} – ${info.Aerolinka}\n`;
 
-        info.Datum = datum;
-        info.Letiště = letiste;
+        info.Date = date;
+        info.Airport = airport;
         vysledky.push(info);
 
         await new Promise(r => setTimeout(r, 500));  // stejně jako Python
@@ -142,5 +142,6 @@ function generateCSV(data) {
 
 </body>
 </html>
+
 
 
