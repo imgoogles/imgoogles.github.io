@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
 <meta charset="UTF-8">
-<title>Letadla – JetAPI</title>
+<title>Planespotting</title>
 <style>
     body { font-family: Arial; padding: 20px; }
     textarea, input { width: 300px; }
@@ -12,15 +12,15 @@
 </head>
 <body>
 
-<h2>Letadla – generátor CSV (přepis Python kódu)</h2>
+<h2>Aircraft registrations to CSV</h2>
 
-<label>Datum:</label><br>
+<label>Date:</label><br>
 <input id="datum" type="text"><br><br>
 
-<label>Letiště:</label><br>
+<label>Airport:</label><br>
 <input id="letiste" type="text"><br><br>
 
-<label>Registrace (oddělené mezerou):</label><br>
+<label>Registration (divided with space):</label><br>
 <textarea id="registrace" rows="4"></textarea><br>
 
 <button onclick="run()">Spustit</button>
@@ -37,9 +37,9 @@ async function getAircraftInfo(registration) {
         if (!resp.ok) {
             document.getElementById("log").innerText += `❌ ${registration}: HTTP ${resp.status}\n`;
             return {
-                Registrace: registration,
-                Typ: "N/A",
-                Aerolinka: "N/A",
+                Registration: registration,
+                Type: "N/A",
+                Airline: "N/A",
                 Thumbnail: "N/A",
                 FullImage: "N/A"
             };
@@ -66,9 +66,9 @@ async function getAircraftInfo(registration) {
         const full_image = photo ? photo.Image : "N/A";
 
         return {
-            Registrace: registration,
-            Typ: typ,
-            Aerolinka: aerolinka,
+            Registration: registration,
+            Type: typ,
+            Airline: aerolinka,
             Thumbnail: thumbnail,
             FullImage: full_image
         };
@@ -76,9 +76,9 @@ async function getAircraftInfo(registration) {
     } catch (e) {
         document.getElementById("log").innerText += `⚠️ Chyba při dotazu na ${registration}: ${e}\n`;
         return {
-            Registrace: registration,
-            Typ: "N/A",
-            Aerolinka: "N/A",
+            Registration: registration,
+            Type: "N/A",
+            Airline: "N/A",
             Thumbnail: "N/A",
             FullImage: "N/A"
         };
@@ -97,7 +97,7 @@ async function run() {
     let counter = 0;
 
     for (let reg of registrace) {
-        log.innerText += `Hledám ${reg} …\n`;
+        log.innerText += `Looking for ${reg} …\n`;
 
         const info = await getAircraftInfo(reg);
 
@@ -111,7 +111,7 @@ async function run() {
 
         counter++;
         if (counter === 12) {
-            log.innerText += `\n⏳ Limit dosažen – čekám 75 sekund...\n\n`;
+            log.innerText += `\n⏳ Limit reached – waiting 75 seconds...\n\n`;
             await new Promise(r => setTimeout(r, 75000));
             counter = 0;
         }
@@ -121,7 +121,7 @@ async function run() {
 }
 
 function generateCSV(data) {
-    const header = ["Datum", "Letiště", "Registrace", "Typ", "Aerolinka", "Thumbnail", "FullImage"];
+    const header = ["Date", "Airport", "Registration", "Type", "Airline", "Thumbnail", "FullImage"];
     let csv = header.join(",") + "\n";
 
     data.forEach(row => {
@@ -133,7 +133,7 @@ function generateCSV(data) {
 
     const a = document.createElement("a");
     a.href = url;
-    a.download = "letadla.csv";
+    a.download = "planespotting.csv";
     a.click();
 
     URL.revokeObjectURL(url);
@@ -142,3 +142,4 @@ function generateCSV(data) {
 
 </body>
 </html>
+
