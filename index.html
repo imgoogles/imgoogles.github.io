@@ -6,94 +6,56 @@
 <style>
     body {
         font-family: Arial;
-        padding: 0;
+        padding: 20px;
         background-color: black;
         color: white;
-        min-height: 100vh;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
     }
-
-    .container {
-        width: 100%;
-        max-width: 500px;
-        padding: 20px;
-        box-sizing: border-box;
-    }
-
-    h2 {
-        text-align: center;
-        font-size: 28px;
-        margin-bottom: 20px;
-    }
-
     textarea, input {
-        width: 100%;
+        width: 320px;
         background-color: black;
         border: 1px solid white;
         color: white;
-        margin: 8px 0;
-        padding: 10px;
-        font-size: 18px;
-        border-radius: 4px;
-        box-sizing: border-box;
+        display: block;
+        padding: 6px;
     }
-
     button {
-        width: 100%;
-        padding: 14px;
-        margin-top: 14px;
+        padding: 10px 20px;
+        margin-top: 10px;
         border: 1px solid white;
         background: transparent;
         color: white;
-        font-size: 18px;
+        font-size: small;
         cursor: pointer;
-        border-radius: 4px;
+        display: block;
     }
-
-    button:active {
-        opacity: 0.6;
-    }
-
     #log {
         white-space: pre-line;
         margin-top: 20px;
-        width: 100%;
-        background: rgba(255,255,255,0.05);
-        padding: 12px;
+        max-width: 800px;
+        width: 90%;
+        text-align: left;
+        background: rgba(255,255,255,0.03);
+        padding: 10px;
         border-radius: 6px;
-        font-size: 16px;
-        box-sizing: border-box;
-    }
-
-    @media (max-width: 420px) {
-        h2 { font-size: 22px; }
-        textarea, input, button { font-size: 16px; }
     }
 </style>
 </head>
 <body>
 
-<div class="container">
+<h2>Aircraft registrations to CSV</h2>
 
-<h2>Aircraft Registrations → CSV</h2>
+<label>Date:</label><br>
+<input id="date_input" type="text" placeholder="e.g. 12.11.2025"><br><br>
 
-<label>Date:</label>
-<input id="date_input" type="text" placeholder="e.g. 12.11.2025">
+<label>Airport:</label><br>
+<input id="airport_input" type="text" placeholder="e.g. PRG, OTP, CPH"><br><br>
 
-<label>Airport:</label>
-<input id="airport_input" type="text" placeholder="e.g. PRG, OTP, CPH">
-
-<label>Registrations (space separated):</label>
-<textarea id="regs_input" rows="4" placeholder="OK-IOO YR-AME ..."></textarea>
+<label>Registrations (separated by space):</label><br>
+<textarea id="regs_input" rows="4" placeholder="OK-IOO YR-AME ..."></textarea><br>
 
 <button onclick="startProcess()">Generate CSV</button>
 
 <div id="log"></div>
-
-</div>
 
 <script>
 async function fetchAircraftInfo(registration) {
@@ -130,12 +92,15 @@ async function fetchAircraftInfo(registration) {
             (photo && photo.Airline) ||
             "N/A";
 
+        const thumbnail = photo ? photo.Thumbnail : "N/A";
+        const fullImage = photo ? photo.Image : "N/A";
+
         return {
             Registration: registration,
             Type: type,
             Airline: airline,
-            Thumbnail: photo ? photo.Thumbnail : "N/A",
-            FullImage: photo ? photo.Image : "N/A"
+            Thumbnail: thumbnail,
+            FullImage: fullImage
         };
 
     } catch (e) {
@@ -162,7 +127,7 @@ async function startProcess() {
     let counter = 0;
 
     for (let reg of regs) {
-        log.innerText += `Searching ${reg}…\n`;
+        log.innerText += `Searching ${reg} …\n`;
 
         const info = await fetchAircraftInfo(reg);
 
@@ -207,3 +172,4 @@ function createCSV(data) {
 
 </body>
 </html>
+
