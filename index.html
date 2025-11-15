@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Aircraft – JetAPI CSV Generator</title>
+<title>Planespotting</title>
 <style>
     body { font-family: Arial; padding: 20px; }
     textarea, input { width: 300px; }
@@ -12,16 +12,16 @@
 </head>
 <body>
 
-<h2>Aircraft – CSV Generator (HTML Version)</h2>
+<h2>Aircraft registrations to CSV</h2>
 
 <label>Date:</label><br>
 <input id="date_input" type="text" placeholder="e.g. 12.11.2025"><br><br>
 
 <label>Airport:</label><br>
-<input id="airport_input" type="text" placeholder="e.g. PRG, LAX, LHR"><br><br>
+<input id="airport_input" type="text" placeholder="e.g. PRG, OTP, CPH"><br><br>
 
 <label>Registrations (separated by space):</label><br>
-<textarea id="regs_input" rows="4" placeholder="OK-IOO OE-LPF ..."></textarea><br>
+<textarea id="regs_input" rows="4" placeholder="OK-IOO YR-AME ..."></textarea><br>
 
 <button onclick="startProcess()">Generate CSV</button>
 
@@ -107,7 +107,7 @@ async function startProcess() {
         info.Airport = airport;
         results.push(info);
 
-        await new Promise(r => setTimeout(r, 500)); // 0.5s pause like Python
+        await new Promise(r => setTimeout(r, 500));
 
         counter++;
         if (counter === 12) {
@@ -142,3 +142,4 @@ function createCSV(data) {
 
 </body>
 </html>
+
