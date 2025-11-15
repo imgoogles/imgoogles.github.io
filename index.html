@@ -158,7 +158,6 @@ async function startProcess() {
 
     createCSV(results);
 }
-
 function createCSV(data) {
     const header = ["Date", "Airport", "Registration", "Type", "Airline", "Thumbnail", "FullImage"];
     let csv = header.join(",") + "\n";
@@ -170,9 +169,24 @@ function createCSV(data) {
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
 
+    // sestavení bezpečného názvu souboru
+    const airportInput = document.getElementById("airport_input").value.trim().toUpperCase();
+    const airport = airportInput || "UNKNOWN";
+
+    let dateInput = document.getElementById("date_input").value.trim();
+    if (!dateInput) {
+        const d = new Date();
+        dateInput = String(d.getDate()).padStart(2, "0") + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + d.getFullYear();
+    } else {
+        // normalizovat různé oddělovače na pomlčku a odstranit opakované pomlčky
+        dateInput = dateInput.replace(/[.\/\s]+/g, "-").replace(/[^0-9\-]/g, "-").replace(/-+/g, "-");
+    }
+
+    const filename = `${airport}_${dateInput}.csv`;
+
     const a = document.createElement("a");
     a.href = url;
-    a.download = "aircraft.csv";
+    a.download = filename;
     a.click();
 
     URL.revokeObjectURL(url);
