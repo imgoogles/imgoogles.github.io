@@ -68,7 +68,7 @@
 
 <script>
 async function fetchAircraftInfo(registration) {
-    const realURL = `https://www.jetapi.dev/api?reg=${registration}&photos=1&flights=0`;
+    const realURL = `https://www.jetapi.dev/api?reg=${registration}&photos=0&flights=0`; // photos=0
     const url = `https://corsproxy.io/?${realURL}`;
 
     try {
@@ -78,38 +78,21 @@ async function fetchAircraftInfo(registration) {
             return {
                 Registration: registration,
                 Type: "N/A",
-                Airline: "N/A",
-                Thumbnail: "N/A",
-                FullImage: "N/A"
+                Airline: "N/A"
             };
         }
 
         const data = await resp.json();
 
         const fr = data.FlightRadar || {};
-        const jp = data.JetPhotos || {};
-        const images = jp.Images || [];
-        const photo = images[0];
 
-        const type =
-            (fr.Aircraft) ||
-            (photo && photo.Aircraft) ||
-            "N/A";
-
-        const airline =
-            (fr.Airline) ||
-            (photo && photo.Airline) ||
-            "N/A";
-
-        const thumbnail = photo ? photo.Thumbnail : "N/A";
-        const fullImage = photo ? photo.Image : "N/A";
+        const type = fr.Aircraft || "N/A";
+        const airline = fr.Airline || "N/A";
 
         return {
             Registration: registration,
             Type: type,
-            Airline: airline,
-            Thumbnail: thumbnail,
-            FullImage: fullImage
+            Airline: airline
         };
 
     } catch (e) {
@@ -117,9 +100,7 @@ async function fetchAircraftInfo(registration) {
         return {
             Registration: registration,
             Type: "N/A",
-            Airline: "N/A",
-            Thumbnail: "N/A",
-            FullImage: "N/A"
+            Airline: "N/A"
         };
     }
 }
@@ -159,7 +140,7 @@ async function startProcess() {
     createCSV(results);
 }
 function createCSV(data) {
-    const header = ["Date", "Airport", "Registration", "Type", "Airline", "Thumbnail", "FullImage"];
+    const header = ["Date", "Airport", "Registration", "Type", "Airline"];
     let csv = header.join(",") + "\n";
 
     data.forEach(row => {
