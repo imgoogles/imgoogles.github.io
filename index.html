@@ -130,7 +130,7 @@ async function startProcess() {
         await new Promise(r => setTimeout(r, 500));
 
         counter++;
-        if (counter === 12) {
+        if (counter === 10) {
             log.innerText += `\n⏳ API limit reached – waiting 75 seconds...\n\n`;
             await new Promise(r => setTimeout(r, 75000));
             counter = 0;
@@ -176,3 +176,4 @@ function createCSV(data) {
 
 </body>
 </html>
+
