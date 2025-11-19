@@ -19,7 +19,6 @@
         color: white;
         display: block;
         padding: 6px;
-        display: block;
         margin-left: auto;
         margin-right: auto;
         margin-top: 5px;
@@ -32,7 +31,6 @@
         color: white;
         font-size: small;
         cursor: pointer;
-        display: block;
         display: block;
         margin-left: auto;
         margin-right: auto;
@@ -64,47 +62,45 @@
 
 <button onclick="startProcess()">Generate CSV</button>
 
+<h3 style="margin-top: 40px;">Merge CSV Files</h3>
+
+<input type="file" id="csv_files" accept=".csv" multiple>
+<button onclick="mergeCSVFiles()">Merge CSV Files</button>
+
 <div id="log"></div>
 
 <script>
+// ───────────────────────────────────────────
+// FETCH AIRCRAFT INFO
+// ───────────────────────────────────────────
 async function fetchAircraftInfo(registration) {
-    const realURL = `https://www.jetapi.dev/api?reg=${registration}&photos=0&flights=0`; // photos=0
+    const realURL = `https://www.jetapi.dev/api?reg=${registration}&photos=0&flights=0`;
     const url = `https://corsproxy.io/?${realURL}`;
 
     try {
         const resp = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" }});
         if (!resp.ok) {
             document.getElementById("log").innerText += `❌ ${registration}: HTTP ${resp.status}\n`;
-            return {
-                Registration: registration,
-                Type: "N/A",
-                Airline: "N/A"
-            };
+            return { Registration: registration, Type: "N/A", Airline: "N/A" };
         }
 
         const data = await resp.json();
-
         const fr = data.FlightRadar || {};
 
-        const type = fr.Aircraft || "N/A";
-        const airline = fr.Airline || "N/A";
-
         return {
             Registration: registration,
-            Type: type,
-            Airline: airline
+            Type: fr.Aircraft || "N/A",
+            Airline: fr.Airline || "N/A"
         };
-
     } catch (e) {
         document.getElementById("log").innerText += `⚠️ Error with ${registration}: ${e}\n`;
-        return {
-            Registration: registration,
-            Type: "N/A",
-            Airline: "N/A"
-        };
+        return { Registration: registration, Type: "N/A", Airline: "N/A" };
     }
 }
 
+// ───────────────────────────────────────────
+// PROCESS REG LIST
+// ───────────────────────────────────────────
 async function startProcess() {
     const log = document.getElementById("log");
     log.innerText = "";
@@ -139,6 +135,55 @@ async function startProcess() {
 
     createCSV(results);
 }
+
+// ───────────────────────────────────────────
+// MERGE CSV FILES (NO DUPLICATE REMOVAL)
+// ───────────────────────────────────────────
+
+async function mergeCSVFiles() {
+    const input = document.getElementById("csv_files");
+    const files = input.files;
+
+    if (!files.length) {
+        alert("Please select CSV files first.");
+        return;
+    }
+
+    const allRows = [];
+    let header = null;
+
+    for (let file of files) {
+        const text = await file.text();
+        const lines = text.trim().split("\n");
+
+        const fileHeader = lines[0].split(",");
+
+        if (!header) header = fileHeader;
+
+        // include all rows, no deduplication
+        for (let i = 1; i < lines.length; i++) {
+            if (lines[i].trim().length > 0) {
+                allRows.push(lines[i]);
+            }
+        }
+    }
+
+    const finalCSV = header.join(",") + "\n" + allRows.join("\n");
+
+    const blob = new Blob([finalCSV], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `MERGED_${Date.now()}.csv`;
+    a.click();
+
+    URL.revokeObjectURL(url);
+}
+
+// ───────────────────────────────────────────
+// CREATE SINGLE CSV FILE
+// ───────────────────────────────────────────
 function createCSV(data) {
     const header = ["Date", "Airport", "Registration", "Type", "Airline"];
     let csv = header.join(",") + "\n";
@@ -150,7 +195,6 @@ function createCSV(data) {
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
 
-    // sestavení bezpečného názvu souboru
     const airportInput = document.getElementById("airport_input").value.trim().toUpperCase();
     const airport = airportInput || "UNKNOWN";
 
@@ -159,7 +203,6 @@ function createCSV(data) {
         const d = new Date();
         dateInput = String(d.getDate()).padStart(2, "0") + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + d.getFullYear();
     } else {
-        // normalizovat různé oddělovače na pomlčku a odstranit opakované pomlčky
         dateInput = dateInput.replace(/[.\/\s]+/g, "-").replace(/[^0-9\-]/g, "-").replace(/-+/g, "-");
     }
 
@@ -176,4 +219,3 @@ function createCSV(data) {
 
 </body>
 </html>
-
