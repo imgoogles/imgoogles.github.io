@@ -1,1 +1,1 @@
-it simply converts aircraft registrations to csv idk what else do you expect
+collection of my personal projects
